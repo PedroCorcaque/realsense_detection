@@ -54,9 +54,14 @@ class ObjectDetection():
 
         print(f"{self.network.GetNetworkFPS()} FPS".format())
 
-def main() -> None:
+def main(camera="realsense") -> None:
     """ A main function to choose the option """
-    pass
+    if camera == "realsense":
+        point_cloud_topic = "/camera/depth/color/points"
+        image_color_topic = "/camera/color/image_raw"
+        _ = ObjectDetection(point_cloud_topic, image_color_topic)
+
+    rospy.spin()
 
 if __name__ == "__main__":
     rospy.init_node("object_detection_node")
