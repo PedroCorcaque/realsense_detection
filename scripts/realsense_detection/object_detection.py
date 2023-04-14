@@ -17,18 +17,15 @@ class ObjectDetection():
         network = "ssd-mobilenet-v2"
         return detectNet(network, threshold=0.5)
 
-    def __init__(self, point_cloud_topic: str, image_topic: str) -> None:
-        self.point_cloud_topic = point_cloud_topic
+    def __init__(self, image_topic: str) -> None:
         self.image_topic = image_topic
 
-        self.image  = None
-        self.points = None
+        self.image_rgb = None
 
         self.network = ObjectDetection.load_network()
 
         source_topic_dict = {
-            "image_rgb": self.image_topic,
-            "points": self.point_cloud_topic
+            "image_rgb": self.image_topic
         }
 
         VisionSynchronizer.syncSubscribers(source_topic_dict, \
@@ -37,11 +34,9 @@ class ObjectDetection():
     def vision_synchronizer_cb(self, *args) -> None:
         """ The callback to image and point cloud synchronized """
         if len(args) > 0:
-            self.image = args[0]
-            self.points = args[1]
+            self.image_rgb = args[0]
 
-        np_image    = ros_numpy.numpify(self.image)
-        np_points   = ros_numpy.numpify(self.points)
+        np_image = ros_numpy.numpify(self.image_rgb)
 
         cuda_image = cudaFromNumpy(np_image)
 
@@ -52,14 +47,14 @@ class ObjectDetection():
         for detection in detections:
             print(detection)
 
-        print(f"{self.network.GetNetworkFPS()} FPS".format())
-
 def main(camera="realsense") -> None:
     """ A main function to choose the option """
     if camera == "realsense":
-        point_cloud_topic = "/camera/depth/color/points"
         image_color_topic = "/camera/color/image_raw"
-        _ = ObjectDetection(point_cloud_topic, image_color_topic)
+        _ = ObjectDetection(image_color_topic)
+    elif camera == "zed":
+        image_color_topic = "/zed/stereo/image_rect_color"
+        _ = ObjectDetection(image_color_topic)
 
     rospy.spin()
 
