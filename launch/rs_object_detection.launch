@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>    
+
+    <!-- Run the realsense launch -->
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="filters" value="pointcloud"/>
+        <arg name="depth_width" value="424"/>
+        <arg name="depth_height" value="240"/>
+        <arg name="depth_fps" value="15"/>
+        <arg name="color_width" value="424"/>
+        <arg name="color_height" value="240"/>
+        <arg name="color_fps" value="15"/>
+    </include>
+
+    <!-- Run the object detection node -->
+    <node name="object_detection_node" pkg="realsense_detection" type="object_detection.py" output="screen"/>
+
+</launch>
